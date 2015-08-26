@@ -26,15 +26,15 @@ class Hash
     end
     self[key].dig_add(rest, value)
   end
-end
 
-def merge_spec_and_manifest(spec, manifest)
-  spec["properties"].each do |key, val|
-    prop_key = "properties.#{key}"
-    default = val["default"]
-    if not default.nil?
-      if not manifest.dig(prop_key)
-        manifest.dig_add(prop_key, default)
+  def merge_with_spec(spec)
+    spec["properties"].each do |key, val|
+      prop_key = "properties.#{key}"
+      default = val["default"]
+      if not default.nil?
+        if not self.dig(prop_key)
+          self.dig_add(prop_key, default)
+        end
       end
     end
   end
@@ -44,12 +44,13 @@ template = File.read(template_path)
 spec = YAML.load_file(spec_path)
 manifest = YAML.load_file(manifest_path)
 
-merge_spec_and_manifest(spec, manifest)
+manifest.merge_with_spec(spec)
+
 # Sometimes we want "spec.index" in the tempates
-manifest["index"] = 0
+manifest.dig_add "index", 0
 
 # for discover_external_ip in acceptance-tests/templates/config.json.erb
-manifest["networks"] = {:blurgh => manifest["networks"][0]}
+manifest.dig_add "networks", {:blurgh => manifest["networks"][0]}
 manifest.dig_add "networks.blurgh.ip", "127.0.0.1"
 
 context = Bosh::Template::EvaluationContext.new(manifest)
