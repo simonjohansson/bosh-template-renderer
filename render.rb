@@ -46,7 +46,12 @@ manifest = YAML.load_file(manifest_path)
 
 merge_spec_and_manifest(spec, manifest)
 # Sometimes we want "spec.index" in the tempates
-manifest.dig_add "index", 0
+manifest["index"] = 0
+
+# for discover_external_ip in acceptance-tests/templates/config.json.erb
+manifest["networks"] = {:blurgh => manifest["networks"][0]}
+manifest.dig_add "networks.blurgh.ip", "127.0.0.1"
+
 context = Bosh::Template::EvaluationContext.new(manifest)
 
 erb = ERB.new(template)
