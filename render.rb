@@ -50,10 +50,12 @@ manifest.merge_with_spec(spec)
 manifest.dig_add "index", 0
 
 # for discover_external_ip in acceptance-tests/templates/config.json.erb
+if not manifest["networks"]
+  manifest["networks"] = []
+end
 manifest.dig_add "networks", {:blurgh => manifest["networks"][0]}
 manifest.dig_add "networks.blurgh.ip", "127.0.0.1"
 
 context = Bosh::Template::EvaluationContext.new(manifest)
-
 erb = ERB.new(template)
 puts erb.result(context.get_binding)
